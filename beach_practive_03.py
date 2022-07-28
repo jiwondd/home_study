@@ -38,7 +38,7 @@ customer = customer.drop_duplicates().reset_index(drop=True)
 
 # merge data
 total_data = pd.merge(weather, customer, left_on='날짜', right_on="방문일", how='inner')
-total_data = total_data[['강수_관측값', "기온", "습도", "체감온도", "평균 수온", "평균 풍속", "평균기압", "평균최대파고", "방문객수(명)"]]
+total_data = total_data[['강수_관측값', "기온", "습도", "체감온도", "평균수온", "평균풍속", "평균기압", "평균최대파고", "방문객수(명)"]]
 
 # train/test split
 train_x, test_x, train_y, test_y = train_test_split(total_data.iloc[:, :-1], total_data['방문객수(명)'], test_size=0.2)

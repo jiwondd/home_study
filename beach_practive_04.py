@@ -26,15 +26,19 @@ weather['날짜'] = pd.to_datetime(weather['날짜'], infer_datetime_format=True
 weather.iloc[:,1:] = weather.iloc[:,1:].apply(pd.to_numeric)
 
 # print(weather.isnull().sum())
-weather.loc[weather['평균 풍속'] != weather['평균 풍속'], '평균 풍속'] = weather['평균 풍속'].mean()
+weather.loc[weather['평균풍속'] != weather['평균풍속'], '평균풍속'] = weather['평균풍속'].mean()
 weather.loc[weather['평균기압'] != weather['평균기압'], '평균기압'] = weather['평균기압'].mean()
-weather.loc[weather['평균 수온'] != weather['평균 수온'], '평균 수온'] = weather['평균 수온'].mean()
+weather.loc[weather['평균수온'] != weather['평균수온'], '평균수온'] = weather['평균수온'].mean()
 weather.loc[weather['평균최대파고'] != weather['평균최대파고'], '평균최대파고'] = weather['평균최대파고'].mean()
-weather.loc[weather['평균 파주기'] != weather['평균 파주기'], '평균 파주기'] = weather['평균 파주기'].mean()
+weather.loc[weather['평균파주기'] != weather['평균파주기'], '평균파주기'] = weather['평균파주기'].mean()
 # print(weather.isnull().sum())
+
+# print(type(weather))
 
 print(type(weather))
 
+
+'''
 # train/test split
 train_x, test_x, train_y, test_y = train_test_split(weather.iloc[:, :-1], weather['기온'], test_size=0.2)
 
@@ -51,3 +55,4 @@ print(test_x.shape) #(324, 9)
 
 # TypeError: The DTypes <class 'numpy.dtype[float64]'> and <class 'numpy.dtype[datetime64]'> do not have a common DType. 
 # For example they cannot be stored in a single array unless the dtype is `object`.
+'''
