@@ -39,4 +39,4 @@ weather_set=x1.apply(pd.to_numeric)
 print(x1.shape) #(422, 9)
 print(x2.shape) #(184, 2)
 
-
+#얘는 
