@@ -105,4 +105,4 @@ model = Model(inputs=input1, outputs=output1)
 model.summary()
 
 
-
+# 되겠냐?
