@@ -72,6 +72,10 @@ x_train, x_test, y_train, y_test=train_test_split(x,y,shuffle=True,random_state=
 
 kFold=StratifiedKFold(n_splits=5, shuffle=True,random_state=42)
 
+# lda=LinearDiscriminantAnalysis() 
+# lda.fit(x,y)
+# x=lda.transform(x)
+
 XG_parameters={'n_estimators':[100],
             'learning_rate':[0.001],
             'max_depth':[3],
