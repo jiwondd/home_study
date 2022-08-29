@@ -29,8 +29,13 @@ test_set=pd.read_csv(path+'test.csv',index_col=0) #예측할때 사용할거에�
 # print(train_set.shape) (1459, 10)
 # print(test_set.shape) (715, 9)
 
-train_set = train_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting', 'OwnCar', 'MonthlyIncome', 'NumberOfFollowups'], axis=1)
-test_set = test_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting', 'OwnCar', 'MonthlyIncome', 'NumberOfFollowups'], axis=1)
+train_set = train_set.replace({'Gender' : 'Fe Male'}, 'Female')
+test_set = test_set.replace({'Gender' : 'Fe Male'}, 'Female')
+train_set = train_set.replace({'Occupation':'Free Lancer'}, 'Small Business')
+test_set = test_set.replace({'Occupation':'Free Lancer'}, 'Small Business')
+
+train_set = train_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting', 'MonthlyIncome', 'NumberOfFollowups'], axis=1)
+test_set = test_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting', 'MonthlyIncome', 'NumberOfFollowups'], axis=1)
 train_set['TypeofContact'].fillna('N', inplace=True)
 
 label=train_set['ProdTaken']
@@ -38,17 +43,9 @@ total_set=pd.concat((train_set,test_set)).reset_index(drop=True)
 total_set=total_set.drop(['ProdTaken'],axis=1)
 # print(total_set.shape) #(4888, 18)
 
-le = LabelEncoder()
-cols = ('TypeofContact','Occupation','Gender','ProductPitched','MaritalStatus','Designation')
-for c in cols:
-    lbl = LabelEncoder() 
-    lbl.fit(list(total_set[c].values)) 
-    total_set[c] = lbl.transform(list(total_set[c].values))
-# print(total_set.info())
-# print(total_set.isnull().sum())
 total_set = pd.get_dummies(total_set)
 
-imputer=IterativeImputer(random_state=42)
+imputer=IterativeImputer(random_state=123)
 imputer.fit(total_set)
 total_set=imputer.transform(total_set)
 
@@ -57,7 +54,7 @@ test_set=total_set[len(train_set):]
 
 x=train_set
 y=label
-print(np.unique(y, return_counts=True))
+# print(np.unique(y, return_counts=True))
 # (array([0, 1], dtype=int64), array([1572,  383], dtype=int64))
 
 scaler=QuantileTransformer()
@@ -70,11 +67,7 @@ x,y=smote.fit_resample(x,y)
 
 x_train, x_test, y_train, y_test=train_test_split(x,y,shuffle=True,random_state=123,train_size=0.8,stratify=y)
 
-kFold=StratifiedKFold(n_splits=5, shuffle=True,random_state=123)
-
-# smote=SMOTE(random_state=123)
-# x_train,y_train=smote.fit_resample(x_train,y_train)
-# print(np.unique(y_train, return_counts=True))
+kFold=StratifiedKFold(shuffle=True,random_state=123)
 
 # 2. 모델구성
 # model=RandomForestClassifier(random_state=123)
@@ -94,7 +87,7 @@ y_summit = model.predict(test_set)
 submission['ProdTaken'] = y_summit
 print('model.score:',result) 
 print('results2:',result2)
-submission.to_csv('./_data/dacon_travel/sample_submission5.csv', index=True)
+# submission.to_csv('./_data/dacon_travel/sample_submission3.csv', index=True)
 
 
 # model.score: 0.8695652173913043 RF
@@ -102,3 +95,4 @@ submission.to_csv('./_data/dacon_travel/sample_submission5.csv', index=True)
 # model.score: 0.9258312020460358 RF smote
 # model.score: 0.8849104859335039 
 # model.score: 0.9332273449920508 <-트레인테스트전에 스모트
+# model.score: 0.9411764705882353
