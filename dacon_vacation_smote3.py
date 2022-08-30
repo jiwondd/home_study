@@ -1,6 +1,7 @@
 # https://dacon.io/competitions/official/235959/overview/description
 
 from cProfile import label
+from tkinter import Y
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
@@ -34,9 +35,10 @@ test_set = test_set.replace({'Gender' : 'Fe Male'}, 'Female')
 train_set = train_set.replace({'Occupation':'Free Lancer'}, 'Small Business')
 test_set = test_set.replace({'Occupation':'Free Lancer'}, 'Small Business')
 
-train_set = train_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting', 'MonthlyIncome', 'NumberOfFollowups'], axis=1)
-test_set = test_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting', 'MonthlyIncome', 'NumberOfFollowups'], axis=1)
+train_set = train_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting','MonthlyIncome','NumberOfFollowups'], axis=1)
+test_set = test_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting','MonthlyIncome','NumberOfFollowups'], axis=1)
 train_set['TypeofContact'].fillna('N', inplace=True)
+test_set['TypeofContact'].fillna('N', inplace=True)
 
 label=train_set['ProdTaken']
 total_set=pd.concat((train_set,test_set)).reset_index(drop=True)
@@ -49,25 +51,23 @@ imputer=IterativeImputer(random_state=123)
 imputer.fit(total_set)
 total_set=imputer.transform(total_set)
 
+scaler=QuantileTransformer()
+scaler.fit(total_set)
+x=scaler.transform(total_set)
+
 train_set=total_set[:len(train_set)]
 test_set=total_set[len(train_set):]
 
 x=train_set
 y=label
-# print(np.unique(y, return_counts=True))
-# (array([0, 1], dtype=int64), array([1572,  383], dtype=int64))
-
-scaler=QuantileTransformer()
-scaler.fit(x)
-x=scaler.transform(x)
-
-smote=SMOTE(random_state=123)
-x,y=smote.fit_resample(x,y)
-# print(np.unique(y, return_counts=True))
 
 x_train, x_test, y_train, y_test=train_test_split(x,y,shuffle=True,random_state=123,train_size=0.8,stratify=y)
 
 kFold=StratifiedKFold(shuffle=True,random_state=123)
+
+smote=SMOTE(random_state=123)
+x_train,y_train=smote.fit_resample(x_train,y_train)
+# print(np.unique(y, return_counts=True))
 
 # 2. 모델구성
 # model=RandomForestClassifier(random_state=123)
@@ -81,13 +81,10 @@ result=model.score(x_test,y_test)
 # print('model.score:',result) 
 
 #5. 데이터 summit
-model.fit(x,y)
-result2=model.score(x,y)
 y_summit = model.predict(test_set)
 submission['ProdTaken'] = y_summit
 print('model.score:',result) 
-print('results2:',result2)
-# submission.to_csv('./_data/dacon_travel/sample_submission3.csv', index=True)
+submission.to_csv('./_data/dacon_travel/sample_submission_vu.csv', index=True)
 
 
 # model.score: 0.8695652173913043 RF
@@ -96,3 +93,7 @@ print('results2:',result2)
 # model.score: 0.8849104859335039 
 # model.score: 0.9332273449920508 <-트레인테스트전에 스모트
 # model.score: 0.9411764705882353
+# model.score: 0.9395866454689984 <- 'MonthlyIncome'
+# model.score: 0.9411764705882353 <- 'NumberOfFollowups'
+# model.score: 0.8746803069053708 <- 스케일러 전체셋에 하니까 점수가 맞음
+# model.score: 0.8772378516624041 <- 'MonthlyIncome','NumberOfFollowups' 다시 살림
