@@ -65,8 +65,8 @@ x_train, x_test, y_train, y_test=train_test_split(x,y,shuffle=True,random_state=
 
 kFold=StratifiedKFold(shuffle=True,random_state=123)
 
-smote=SMOTE(random_state=123)
-x_train,y_train=smote.fit_resample(x_train,y_train)
+# smote=SMOTE(random_state=123)
+# x_train,y_train=smote.fit_resample(x_train,y_train)
 # print(np.unique(y, return_counts=True))
 
 # 2. 모델구성
@@ -84,7 +84,7 @@ result=model.score(x_test,y_test)
 y_summit = model.predict(test_set)
 submission['ProdTaken'] = y_summit
 print('model.score:',result) 
-submission.to_csv('./_data/dacon_travel/sample_submission_vu.csv', index=True)
+# submission.to_csv('./_data/dacon_travel/sample_submission_vu.csv', index=True)
 
 
 # model.score: 0.8695652173913043 RF
@@ -97,3 +97,4 @@ submission.to_csv('./_data/dacon_travel/sample_submission_vu.csv', index=True)
 # model.score: 0.9411764705882353 <- 'NumberOfFollowups'
 # model.score: 0.8746803069053708 <- 스케일러 전체셋에 하니까 점수가 맞음
 # model.score: 0.8772378516624041 <- 'MonthlyIncome','NumberOfFollowups' 다시 살림
+# model.score: 0.8849104859335039 <- 스모트 빼버림
