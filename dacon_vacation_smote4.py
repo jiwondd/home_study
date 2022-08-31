@@ -20,6 +20,7 @@ from sklearn.ensemble import RandomForestClassifier
 from catboost import CatBoostClassifier
 from sklearn.decomposition import PCA
 from imblearn.over_sampling import SMOTE
+from bayes_opt import BayesianOptimization
 
 
 #.1 데이터
@@ -34,11 +35,25 @@ train_set = train_set.replace({'Gender' : 'Fe Male'}, 'Female')
 test_set = test_set.replace({'Gender' : 'Fe Male'}, 'Female')
 train_set = train_set.replace({'Occupation':'Free Lancer'}, 'Small Business')
 test_set = test_set.replace({'Occupation':'Free Lancer'}, 'Small Business')
+train_set = train_set.replace({'MaritalStatus' : 'Divorced'}, 'Single')
+test_set = test_set.replace({'MaritalStatus' : 'Divorced'}, 'Single')
+# train_set = train_set.replace({'MaritalStatus' : 'Unmarried'}, 'Married')
+# test_set = test_set.replace({'MaritalStatus' : 'Unmarried'}, 'Married')
 
-train_set = train_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting','MonthlyIncome','NumberOfFollowups'], axis=1)
-test_set = test_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting','MonthlyIncome','NumberOfFollowups'], axis=1)
-train_set['TypeofContact'].fillna('N', inplace=True)
-test_set['TypeofContact'].fillna('N', inplace=True)
+train_set['Age'].fillna(train_set.groupby('Designation')['Age'].transform('mean'), inplace=True)
+test_set['Age'].fillna(test_set.groupby('Designation')['Age'].transform('mean'), inplace=True)
+train_set['MonthlyIncome'].fillna(train_set.groupby('Designation')['MonthlyIncome'].transform('mean'), inplace=True)
+test_set['MonthlyIncome'].fillna(test_set.groupby('Designation')['MonthlyIncome'].transform('mean'), inplace=True)
+train_set['PreferredPropertyStar'].fillna(train_set.groupby('Occupation')['PreferredPropertyStar'].transform('mean'), inplace=True)
+test_set['PreferredPropertyStar'].fillna(test_set.groupby('Occupation')['PreferredPropertyStar'].transform('mean'), inplace=True)
+
+train_set['Age']=np.round(train_set['Age'],0).astype(int)
+test_set['Age']=np.round(test_set['Age'],0).astype(int)
+
+train_set = train_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting','NumberOfFollowups'], axis=1)
+test_set = test_set.drop(['NumberOfChildrenVisiting', 'NumberOfPersonVisiting','NumberOfFollowups'], axis=1)
+train_set['TypeofContact'].fillna('Self Enquiry', inplace=True)
+test_set['TypeofContact'].fillna('Self Enquiry', inplace=True)
 
 label=train_set['ProdTaken']
 total_set=pd.concat((train_set,test_set)).reset_index(drop=True)
@@ -62,13 +77,13 @@ test_set=total_set[len(train_set):]
 x=train_set
 y=label
 
+# smote=SMOTE(random_state=123)
+# x,y=smote.fit_resample(x,y)
+# print(np.unique(y, return_counts=True))
+
 x_train, x_test, y_train, y_test=train_test_split(x,y,shuffle=True,random_state=123,train_size=0.8,stratify=y)
 
 kFold=StratifiedKFold(shuffle=True,random_state=123)
-
-# smote=SMOTE(random_state=123)
-# x_train,y_train=smote.fit_resample(x_train,y_train)
-# print(np.unique(y, return_counts=True))
 
 # 2. 모델구성
 # model=RandomForestClassifier(random_state=123)
@@ -85,7 +100,7 @@ result=model.score(x_test,y_test)
 y_summit = model.predict(test_set)
 submission['ProdTaken'] = y_summit
 print('model.score:',result) 
-# submission.to_csv('./_data/dacon_travel/sample_submission_vu.csv', index=True)
+# submission.to_csv('./_data/dacon_travel/sample_submission_93.csv', index=True)
 
 
 # model.score: 0.8695652173913043 RF
@@ -99,3 +114,10 @@ print('model.score:',result)
 # model.score: 0.8746803069053708 <- 스케일러 전체셋에 하니까 점수가 맞음
 # model.score: 0.8772378516624041 <- 'MonthlyIncome','NumberOfFollowups' 다시 살림
 # model.score: 0.8849104859335039 <- 스모트 빼버림
+# model.score: 0.8746803069053708 <-divorce,single/marrid,unmerride
+# model.score: 0.8823529411764706 <-디보스&싱글/메리/언메리
+# model.score: 0.8797953964194374 <-싱글/메리&언메리/디볼스
+# model.score: 0.8823529411764706 <-민맥스
+# model.score: 0.8721227621483376 <-민맥스+스모트
+# model.score: 0.9300476947535771 <-스모트 위치변경 / 서브미션 0.880
+# model.score: 0.931637519872814 <-전처리변경
