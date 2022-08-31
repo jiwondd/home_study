@@ -1,0 +1,31 @@
+CatBoostClassifier(verbose=0,
+          n_estimators=int(n_estimators),
+          learning_rate=learning_rate,
+          l2_leaf_reg=l2_leaf_reg,
+          max_depth=int(depth),
+          random_state=42,
+          grow_policy='Lossguide',
+          use_best_model=True, #디폴트
+          model_size_reg=model_size_reg,
+          od_pval=od_pval
+          )
+          
+loss-function
+custom-metric
+eval-metric
+
+n_estimators
+learning-rate
+random_state
+
+l2_leaf_reg(reg_lambda)= 디폴트 3.0 / float
+bagging-temperature = 디폴트 1 / 0~ / float
+subsample 데이터사이즈에 따라서 디폴트값이 달라진다 / float
+sampling-frequency 디폴트 PerTreeLevel / PerTreeLevel or PerTree 
+max_depth 디폴트 6/ int
+min-data-in-leaf 디폴트 SymmetricTree / Depthwise or Lossguide
+max-leaves 디폴트 31 / int
+
+#Overfitting detection settings
+early_stopping_rounds
+
