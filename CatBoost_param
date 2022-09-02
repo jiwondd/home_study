@@ -20,15 +20,47 @@ random_state
 
 l2_leaf_reg(reg_lambda)= 디폴트 3.0 / float
 bagging-temperature = 디폴트 1 / 0~ / float
-subsample 데이터사이즈에 따라서 디폴트값이 달라진다 / float
+subsample 데이터사이즈에 따라서 달라진다 / float
+best_model_min_trees 디폴트 none / int
+min_data_in_leaf(min_child_samples) 디폴트 1 / int 
 max-leaves 디폴트 31 / int
 max_depth 디폴트 6/ int
+one_hot_max_size 디폴트 데이터사이즈에 따라서 달라진다 / int
+
+
 
 string type의 파라미터
-min-data-in-leaf 디폴트 SymmetricTree / Depthwise or Lossguide
 sampling-frequency 디폴트 PerTreeLevel / PerTreeLevel or PerTree 
-
+min-data-in-leaf 디폴트 SymmetricTree / Depthwise or Lossguide
+sampling_unit 디폴트 Object / Object or Group
+use_best_model 디폴트 true / bool (validation이 있어야지만 사용가능한 파라미터)
+grow_policy 디폴트 SymmetricTree / SymmetricTree, Depthwise, Lossguide (디폴트쓰는걸로하자!)
 
 #Overfitting detection settings
 early_stopping_rounds
 
+def cb_hamsu(reg_lambda,bagging-temperature,subsample,max_depth,
+             max_leaves,best_model_min_trees,min_data_in_leaf,one_hot_max_size):
+    params={
+        'n_estimators':500,'learning_rate':0.02,
+        'sampling_frequency':'PerTree',
+        'reg_lambda':max(reg_lambda,0), #양수만 받는다 0이상
+        'bagging_temperature':max(bagging_temperature,0),
+        'subsample':max(subsample,0),
+        # 'subsample':max(min(subsample,1),0), # 0~1 사이로
+        'max_depth':int(round(max_depth)), #정수로
+        'max_leaves':int(round(max_leaves)),
+        'best_model_min_trees':int(round(best_model_min_trees)),
+        'min_data_in_leaf':int(round(min_data_in_leaf)),
+        'one_hot_max_size':int(round(one_hot_max_size)), # 10이상의 정수
+    }
+    
+    model=CatBoostClassifier(**params)
+    model.fit(x_train,y_train,eval_set=[(x_train,y_train),(x_test,y_test)],
+              eval_metric='accuracy_score',
+              verbose=0,
+              early_stopping_rounds=50)
+    y_pred=model.predict(x_test)
+    result=accuracy_score(y_test,y_pred)
+    
+    return result
